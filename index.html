@@ -1,527 +1,337 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Calendario de Cumpleaños</title>
-<style>
-  :root{
-    --blue:#1976d2; --blue2:#1565c0; --ink:#1f2a44; --bg:#f4f7fb; --line:#e3e8f4;
-    --today:#ffecb3; --birthday:#ffe0e0; --ok:#1b5e20; --warn:#b71c1c;
-  }
-  *{box-sizing:border-box}
-  body{margin:0;font-family:Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
-  header{background:var(--blue);color:#fff;padding:14px 18px}
-  header h1{margin:0;font-size:1.2rem}
-
-  .wrap{max-width:1100px;margin:0 auto;padding:0 12px 28px}
-  .layout{display:grid;grid-template-columns:1fr 320px;gap:16px}
-  @media (max-width:980px){ .layout{grid-template-columns:1fr} }
-
-  /* Banner “Cumpleañeros de hoy” */
-  .banner{background:#fff;border:1px solid var(--line);border-radius:10px;margin:12px 0;padding:12px}
-  .banner-title{font-weight:700;margin:0 0 6px}
-  .banner-list{margin:6px 0 0;padding-left:18px}
-  .banner-empty{margin:6px 0 0;opacity:.8}
-
-  /* Leyenda y toolbar */
-  .legend{display:flex;gap:12px;align-items:center;margin:8px 0 4px;font-size:.92rem;flex-wrap:wrap}
-  .chip{display:inline-flex;align-items:center;gap:6px}
-  .chip .sw{width:14px;height:14px;border-radius:4px;display:inline-block;border:1px solid var(--line)}
-  .sw.today{background:var(--today)}
-  .sw.bday{background:var(--birthday)}
-
-  .toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between;margin:8px 0 12px}
-  .btn{border:1px solid #c7d3ea;background:#fff;border-radius:8px;padding:8px 12px;cursor:pointer}
-  .btn:active{transform:translateY(1px)}
-  #labelMes{font-weight:700}
-
-  /* Calendario */
-  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
-  .dow{font-weight:700;text-align:center;font-size:.9rem;opacity:.8}
-  .day{
-    position:relative;background:#fff;border:1px solid var(--line);border-radius:12px;min-height:100px;
-    padding:8px;cursor:pointer;transition:transform .16s ease, box-shadow .16s ease;will-change:transform;
-  }
-  .day:hover{ transform:scale(1.06); z-index:3; box-shadow:0 6px 16px rgba(0,0,0,.12) }
-  .day.zoom{ transform:scale(1.22); z-index:5; box-shadow:0 10px 26px rgba(0,0,0,.18) }
-  .num{font-weight:800;font-size:1rem}
-  .badges{position:absolute;right:8px;top:8px;display:flex;gap:6px}
-  .badge{font-size:.72rem;padding:2px 6px;border-radius:999px;border:1px solid var(--line);background:#fafafa}
-  .is-today{background:var(--today)}
-  .has-birthday{background:var(--birthday)}
-  .names{margin-top:6px;font-size:.9rem;line-height:1.2rem}
-  .name-pill{
-    display:block;background:#fafafa;border:1px solid var(--line);border-radius:8px;padding:4px 6px;margin:4px 0;
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer;
-  }
-  .name-pill:hover{outline:2px solid #dbe5ff}
-
-  /* Panel lateral (agregar/editar) */
-  .panel{
-    position:sticky; top:10px; align-self:start;
-    background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px;
-  }
-  .panel h2{margin:6px 0 10px;font-size:1.05rem}
-  .row{display:flex;flex-direction:column;gap:6px;margin:8px 0}
-  label{font-size:.9rem}
-  input,select{border:1px solid #c7d3ea;border-radius:8px;padding:8px;font-size:1rem;background:#fff}
-  .panel .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-  .btn.main{background:var(--blue);border-color:var(--blue2);color:#fff}
-  .btn.ok{background:#e8f5e9;border-color:#c8e6c9}
-  .btn.danger{background:#ffebee;border-color:#ffcdd2}
-  .muted{opacity:.6}
-
-  /* Avisos */
-  .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:16px;background:#111;color:#fff;
-    padding:10px 14px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s ease}
-  .toast.show{opacity:.95}
-
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cumpleaños LT</title>
+  <style>
+    :root{--blue:#1976d2;--blue2:#1565c0;--ink:#1f2a44;--line:#e3e8f4;--bg:#f4f7fb}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
+    header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--blue);color:#fff;padding:14px 18px}
+    h1{margin:0;font-size:1.2rem}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{border:1px solid var(--blue2);background:#2196f3;color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}
+    .btn.secondary{background:#5b6b95;border-color:#4a587f}
+    .btn:hover{background:var(--blue2)}
+    .input{padding:6px 10px;border:1px solid #cfd8ea;border-radius:6px}
+    main{max-width:980px;margin:0 auto;padding:16px}
+    .today-box{background:#fff3cd;border:1px solid #ffe8a1;border-radius:10px;padding:12px;margin:10px 0;display:none}
+    .calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:10px}
+    .wday{background:#eef3ff;border:1px solid var(--line);border-radius:6px;padding:8px 6px;text-align:center;font-weight:700;color:#31406e}
+    .day{background:#fff;border:1px solid var(--line);min-height:92px;border-radius:6px;padding:6px;position:relative}
+    .day.today{background:#fff9c4}
+    .date{font-weight:700;font-size:.85rem;margin-bottom:4px}
+    .event{font-size:.82rem;background:#e3f2fd;margin:2px 0;padding:2px 6px;border-radius:4px;display:flex;justify-content:space-between;gap:6px;align-items:center}
+    .event .del{border:1px solid #e57373;background:#ef9a9a;color:#fff;padding:0 6px;border-radius:4px;cursor:pointer}
+    .panel{background:#fff;border:1px dashed #cfd8ea;border-radius:10px;padding:12px;margin:14px 0}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .small{font-size:.9rem;color:#444}
+    /* Lista */
+    .list{background:#fff;border:1px solid var(--line);border-radius:10px;margin-top:10px;overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid #eef2f9;font-size:.95rem}
+    th{background:#eef3ff;text-align:left;color:#31406e}
+    .right{text-align:right}
+    .hidden{display:none}
+  </style>
 </head>
 <body>
   <header>
-    <h1>Calendario de Cumpleaños</h1>
-  </header>
-
-  <div class="wrap">
-    <!-- Banner cumpleañeros de hoy -->
-    <section class="banner" id="bannerCumples">
-      <p class="banner-title">Cumpleañeros del día de hoy</p>
-      <p class="banner-empty" id="bannerEmpty" hidden>No hay cumpleañeros el día de hoy.</p>
-      <ul class="banner-list" id="bannerList"></ul>
-    </section>
-
-    <div class="legend">
-      <span class="chip"><span class="sw today"></span> Hoy</span>
-      <span class="chip"><span class="sw bday"></span> Cumpleaños</span>
+    <div class="toolbar">
+      <h1>🎉 Cumpleaños LT</h1>
     </div>
 
     <div class="toolbar">
-      <div>
-        <button class="btn" id="prevBtn">◀ Mes anterior</button>
-        <button class="btn" id="todayBtn">Hoy</button>
-        <button class="btn" id="nextBtn">Mes siguiente ▶</button>
-      </div>
-      <div id="labelMes"></div>
+      <button id="prev" class="btn">⟨ Mes anterior</button>
+      <div id="monthTitle" style="font-weight:600"></div>
+      <button id="next" class="btn">Mes siguiente ⟩</button>
     </div>
 
-    <div class="layout">
-      <!-- Calendario -->
-      <div>
-        <div class="grid" id="grid"></div>
+    <div class="toolbar">
+      <button id="btnViewCal" class="btn">Vista calendario</button>
+      <button id="btnViewList" class="btn secondary">Vista lista</button>
+      <input id="search" class="input" placeholder="Buscar nombre" />
+      <button id="clear" class="btn secondary">Limpiar</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- Cumpleaños de hoy -->
+    <section id="today" class="today-box"></section>
+
+    <!-- CABECERA de semana y CALENDARIO -->
+    <section id="calHead" class="calendar"></section>
+    <section id="calendar" class="calendar"></section>
+
+    <!-- LISTA -->
+    <section id="listWrap" class="list hidden">
+      <table id="listTable">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Mes</th>
+            <th>Día</th>
+            <th>Departamento</th>
+            <th class="right">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="listBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Login edición simple -->
+    <section id="adminLogin" class="panel">
+      <div class="row">
+        <label>Contraseña de edición (simple):</label>
+        <input type="password" id="pwd" class="input" placeholder="Escriba la contraseña" />
+        <button id="btnPwd" class="btn">Entrar</button>
+        <span id="modeLabel">Modo lectura</span>
+      </div>
+    </section>
+
+    <!-- Panel edición -->
+    <section id="adminPanel" class="panel hidden">
+      <h3 style="margin:0 0 8px 0">Agregar cumpleaños</h3>
+      <div class="row">
+        <input type="text" id="name" class="input" placeholder="Nombre" />
+        <label>Mes</label>
+        <input type="number" id="month" class="input" min="1" max="12" placeholder="MM" style="width:90px" />
+        <label>Día</label>
+        <input type="number" id="day" class="input" min="1" max="31" placeholder="DD" style="width:90px" />
+        <input type="text" id="dept" class="input" placeholder="Departamento (opcional)" />
+        <button id="btnAdd" class="btn">Agregar</button>
       </div>
 
-      <!-- Panel lateral: agregar/editar -->
-      <aside class="panel">
-        <h2 id="formTitle">Agregar cumpleañero</h2>
-        <form id="personForm">
-          <input type="hidden" id="personId" />
-          <div class="row">
-            <label for="name">Nombre completo</label>
-            <input id="name" placeholder="Ej: Ana Yancy Rodríguez Villalobos" required />
-          </div>
-          <div class="row">
-            <label for="email">Correo electrónico</label>
-            <input id="email" type="email" placeholder="Ej: ana@example.com" />
-          </div>
-          <div class="row" style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
-            <div>
-              <label for="month">Mes</label>
-              <select id="month" required></select>
-            </div>
-            <div>
-              <label for="day">Día</label>
-              <select id="day" required></select>
-            </div>
-          </div>
-          <div class="actions">
-            <button type="submit" class="btn main" id="saveBtn">Guardar</button>
-            <button type="button" class="btn ok muted" id="cancelEditBtn" hidden>Cancelar</button>
-            <button type="button" class="btn danger" id="deleteBtn" hidden>Eliminar</button>
-          </div>
-        </form>
-        <hr />
-        <div class="actions">
-          <button class="btn" id="exportBtn">Exportar JSON</button>
-          <label class="btn" for="importFile" style="cursor:pointer">Importar JSON</label>
-          <input id="importFile" type="file" accept="application/json" style="display:none" />
-          <button class="btn" id="clearBtn">Limpiar todo</button>
-        </div>
-        <p class="muted" style="margin:8px 0 0">Los datos se guardan en este navegador (localStorage).</p>
-      </aside>
-    </div>
-  </div>
+      <h4 style="margin:14px 0 6px 0">Importación masiva</h4>
+      <p class="small" style="margin:0 0 6px 0">
+        Formato: <code>Nombre,MM,DD</code> (opcionalmente <code>,Departamento</code>). Use ceros a la izquierda (ej. <code>05</code>).
+      </p>
+      <textarea id="bulk" rows="5" style="width:100%;padding:8px;border:1px solid #cfd8ea;border-radius:8px"
+        placeholder="Ejemplo:
+Ana Pérez,02,11
+Luis Gómez,08,30,Dirección"></textarea>
+      <div class="row" style="margin-top:8px">
+        <button id="btnBulk" class="btn">⬆️ Importar</button>
+        <button id="btnLogout" class="btn secondary">Salir de edición</button>
+      </div>
+    </section>
+  </main>
 
-  <div class="toast" id="toast"></div>
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-<script>
-/* ====================== UTILIDADES ====================== */
-// Genera ids simples
-function uid(){ return 'id-' + Math.random().toString(36).slice(2,10) }
-// Hoy (usa fecha local; si lo publicas, puedes forzar tz "America/Costa_Rica" con backend)
-function today(){ const n=new Date(); return new Date(n.getFullYear(),n.getMonth(),n.getDate()) }
-function sameYMD(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate() }
-function daysInMonth(y,m){ return new Date(y, m+1, 0).getDate() } // m: 0..11
-function nombreMesES(m){ return ["enero","febrero","marzo","abril","mayo","junio","julio","agosto","septiembre","octubre","noviembre","diciembre"][m] }
-function dowES(d){ return ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"][d] }
-function showToast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),1600) }
+    // ⬇️ Revisa que storageBucket coincida con tu consola (normalmente *.appspot.com)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqdejaNqu8YeiOPID6WcGwU6TLpyy_5ew",
+      authDomain: "cumplelt-44191.firebaseapp.com",
+      projectId: "cumplelt-44191",
+      storageBucket: "cumplelt-44191.appspot.com",
+      messagingSenderId: "793481323824",
+      appId: "1:793481323824:web:d69b527fc2d91555cd94f5"
+    };
 
-/* ====================== ALMACENAMIENTO ====================== */
-const STORAGE_KEY = "cumples_v2"; // v2: incluye email e id
+    const SECRET = "tarrazu";
+    let db = null;
+    try { const app = initializeApp(firebaseConfig); db = getFirestore(app); }
+    catch (e) { console.warn("Firebase no inicializado todavía.", e); }
 
-function loadData(){
-  const raw = localStorage.getItem(STORAGE_KEY);
-  if(!raw) return [];
-  try{
-    const arr = JSON.parse(raw);
-    // Normaliza: asegura id
-    arr.forEach(x=>{ if(!x.id) x.id = uid(); });
-    return arr;
-  }catch(e){ console.warn("JSON inválido, se reinicia almacenamiento."); return [] }
-}
+    const $=s=>document.querySelector(s);
+    const monthTitle=$("#monthTitle"),todayBox=$("#today"),
+          calHead=$("#calHead"),calBody=$("#calendar"),
+          listWrap=$("#listWrap"),listBody=$("#listBody");
 
-function saveData(list){
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(list));
-}
+    const weekdays=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
+    let allItems=[],isEditor=false,cur=new Date(),curMonth=cur.getMonth(),curYear=cur.getFullYear();
+    const pad2=n=>String(n).padStart(2,"0");
 
-let PEOPLE = loadData();
-
-/* ====================== ESTADO DE VISTA ====================== */
-const labelMes = document.getElementById("labelMes");
-const grid = document.getElementById("grid");
-const bannerList = document.getElementById("bannerList");
-const bannerEmpty = document.getElementById("bannerEmpty");
-
-let view = (()=>{ const t=today(); return {y:t.getFullYear(), m:t.getMonth()} })();
-
-/* ====================== FORMULARIO ====================== */
-const personForm = document.getElementById("personForm");
-const personId = document.getElementById("personId");
-const nameEl = document.getElementById("name");
-const emailEl = document.getElementById("email");
-const monthEl = document.getElementById("month");
-const dayEl = document.getElementById("day");
-const formTitle = document.getElementById("formTitle");
-const saveBtn = document.getElementById("saveBtn");
-const deleteBtn = document.getElementById("deleteBtn");
-const cancelEditBtn = document.getElementById("cancelEditBtn");
-
-// Rellena selects de mes y día
-function fillMonthDaySelectors(){
-  monthEl.innerHTML = "";
-  for(let i=0;i<12;i++){
-    const opt = document.createElement("option");
-    opt.value = (i+1);
-    opt.textContent = nombreMesES(i).charAt(0).toUpperCase()+nombreMesES(i).slice(1);
-    monthEl.appendChild(opt);
-  }
-  fillDays(31);
-}
-function fillDays(n){
-  dayEl.innerHTML = "";
-  for(let d=1; d<=n; d++){
-    const opt = document.createElement("option");
-    opt.value = d;
-    opt.textContent = d;
-    dayEl.appendChild(opt);
-  }
-}
-
-// Ajusta cantidad de días cuando cambia el mes
-monthEl.addEventListener("change", ()=>{
-  const m = Number(monthEl.value)-1;
-  // Año no importa para cantidad genérica; usa 2025 por consistencia
-  const n = daysInMonth(2025, m);
-  fillDays(n);
-  // Si el día anterior excede, colócalo al máximo
-  if(Number(dayEl.value) > n){ dayEl.value = String(n); }
-});
-
-// Estado del formulario (agregar/editar)
-function setFormMode(mode, data=null){
-  if(mode==="add"){
-    formTitle.textContent = "Agregar cumpleañero";
-    personId.value = "";
-    nameEl.value = "";
-    emailEl.value = "";
-    monthEl.value = String((view.m)+1);
-    const n = daysInMonth(2025, view.m);
-    fillDays(n);
-    dayEl.value = "1";
-    deleteBtn.hidden = true;
-    cancelEditBtn.hidden = true;
-    saveBtn.textContent = "Guardar";
-  }else{
-    formTitle.textContent = "Editar cumpleañero";
-    personId.value = data.id;
-    nameEl.value = data.name || "";
-    emailEl.value = data.email || "";
-    monthEl.value = String(data.month);
-    const n = daysInMonth(2025, data.month-1);
-    fillDays(n);
-    dayEl.value = String(data.day);
-    deleteBtn.hidden = false;
-    cancelEditBtn.hidden = false;
-    saveBtn.textContent = "Actualizar";
-  }
-}
-
-personForm.addEventListener("submit",(e)=>{
-  e.preventDefault();
-  const id = personId.value || uid();
-  const rec = {
-    id,
-    name: nameEl.value.trim(),
-    email: emailEl.value.trim(),
-    month: Number(monthEl.value),
-    day: Number(dayEl.value)
-  };
-  if(!rec.name){ showToast("El nombre es obligatorio."); return; }
-
-  const idx = PEOPLE.findIndex(p=>p.id===id);
-  if(idx>=0){
-    PEOPLE[idx] = rec;
-    showToast("Cumpleañero actualizado.");
-  }else{
-    PEOPLE.push(rec);
-    showToast("Cumpleañero agregado.");
-  }
-  saveData(PEOPLE);
-  renderAll();
-  setFormMode("add");
-});
-
-deleteBtn.addEventListener("click", ()=>{
-  const id = personId.value;
-  if(!id) return;
-  const p = PEOPLE.find(p=>p.id===id);
-  const ok = confirm(`¿Eliminar a "${p?.name}" del listado?`);
-  if(!ok) return;
-  PEOPLE = PEOPLE.filter(p=>p.id!==id);
-  saveData(PEOPLE);
-  renderAll();
-  setFormMode("add");
-  showToast("Eliminado.");
-});
-
-cancelEditBtn.addEventListener("click", ()=>{
-  setFormMode("add");
-});
-
-/* ====================== EXPORTAR / IMPORTAR ====================== */
-document.getElementById("exportBtn").addEventListener("click", ()=>{
-  const blob = new Blob([JSON.stringify(PEOPLE, null, 2)], {type:"application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = "cumpleaneros.json";
-  a.click();
-  URL.revokeObjectURL(a.href);
-});
-
-document.getElementById("importFile").addEventListener("change", (ev)=>{
-  const file = ev.target.files?.[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ()=>{
-    try{
-      const data = JSON.parse(reader.result);
-      if(!Array.isArray(data)) throw new Error("Formato inválido");
-      // Normaliza y fusiona por id; si no hay id, crea uno y evita duplicados exactos
-      data.forEach(x=>{
-        if(!x.id) x.id = uid();
-        if(!x.name || !x.month || !x.day) return; // ignora incompletos
-        const dup = PEOPLE.find(p=>p.name===x.name && p.month===x.month && p.day===x.day && p.email===x.email);
-        if(!PEOPLE.find(p=>p.id===x.id) && !dup){ PEOPLE.push(x); }
-      });
-      saveData(PEOPLE);
-      renderAll();
-      showToast("Importación completada.");
-      ev.target.value = "";
-    }catch(e){
-      alert("No se pudo importar el archivo. Verifica el formato JSON.");
+    // ---------- Render cabecera semana ----------
+    function renderWeekdays(){
+      calHead.innerHTML="";
+      for(const w of weekdays){
+        const el=document.createElement("div");
+        el.className="wday"; el.textContent=w;
+        calHead.appendChild(el);
+      }
     }
-  };
-  reader.readAsText(file);
-});
 
-document.getElementById("clearBtn").addEventListener("click", ()=>{
-  const ok = confirm("Esto eliminará TODOS los cumpleañeros guardados en este navegador. ¿Continuar?");
-  if(!ok) return;
-  PEOPLE = [];
-  saveData(PEOPLE);
-  renderAll();
-  setFormMode("add");
-  showToast("Datos limpiados.");
-});
+    // ---------- Render calendario ----------
+    function renderCalendar(){
+      calBody.innerHTML="";
+      const first=new Date(curYear,curMonth,1);
+      const last=new Date(curYear,curMonth+1,0);
+      const startIdx=(first.getDay()+6)%7; // lunes=0
+      const daysInMonth=last.getDate();
+      monthTitle.textContent=first.toLocaleDateString("es-CR",{month:"long",year:"numeric"});
 
-/* ====================== CALENDARIO ====================== */
-function buildHeaders(){
-  grid.innerHTML = "";
-  const week = ["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
-  week.forEach(w=>{
-    const h = document.createElement("div");
-    h.className = "dow";
-    h.textContent = w;
-    grid.appendChild(h);
-  });
-}
+      for(let i=0;i<startIdx;i++){const e=document.createElement("div");e.className="day";calBody.appendChild(e);}
 
-function getBirthdaysOn(month, day){
-  return PEOPLE.filter(b => Number(b.month)===Number(month) && Number(b.day)===Number(day));
-}
+      for(let d=1; d<=daysInMonth; d++){
+        const cell=document.createElement("div"); cell.className="day";
+        const now=new Date();
+        if(d===now.getDate() && curMonth===now.getMonth() && curYear===now.getFullYear()){cell.classList.add("today");}
 
-function renderBannerHoy(){
-  const t = today();
-  const nombres = getBirthdaysOn(t.getMonth()+1, t.getDate());
-  bannerList.innerHTML = "";
-  if(nombres.length===0){
-    bannerEmpty.hidden = false;
-  }else{
-    bannerEmpty.hidden = true;
-    nombres.forEach(b=>{
-      const li = document.createElement("li");
-      li.textContent = b.name + (b.email ? ` — ${b.email}` : "");
-      bannerList.appendChild(li);
-    });
-  }
-}
+        const dateEl=document.createElement("div"); dateEl.className="date"; dateEl.textContent=d; cell.appendChild(dateEl);
 
-function buildCalendar(){
-  buildHeaders();
-  const {y,m} = view;
-  labelMes.textContent = `${nombreMesES(m)} ${y}`;
+        const events=allItems
+          .filter(it=>Number(it.m)===curMonth+1 && Number(it.d)===d)
+          .sort((a,b)=>a.name.localeCompare(b.name));
 
-  // Día de la semana del 1° (ajustado para que la semana inicie en Lunes)
-  const first = new Date(y, m, 1);
-  let startIdx = first.getDay(); // 0:Dom .. 6:Sáb
-  if(startIdx===0) startIdx = 7; // mueve domingo al final
-  const blanks = startIdx-1;
+        for(const ev of events){
+          const e=document.createElement("div"); e.className="event";
+          const label=document.createElement("span");
+          label.textContent=ev.name+(ev.dept?` — ${ev.dept}`:"");
+          e.appendChild(label);
 
-  // Celdas vacías iniciales
-  for(let i=0;i<blanks;i++){
-    const d = document.createElement("div");
-    grid.appendChild(d);
-  }
-
-  const nDays = daysInMonth(y,m);
-  const hoy = today();
-
-  for(let day=1; day<=nDays; day++){
-    const cell = document.createElement("div");
-    cell.className = "day";
-    cell.tabIndex = 0; // accesible
-    cell.dataset.date = `${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-
-    const d = new Date(y,m,day);
-    const list = getBirthdaysOn(m+1, day);
-
-    // Estilos especiales
-    if(sameYMD(d, hoy)) cell.classList.add("is-today");
-    if(list.length>0) cell.classList.add("has-birthday");
-
-    // Número del día
-    const num = document.createElement("div");
-    num.className = "num";
-    num.textContent = day;
-    cell.appendChild(num);
-
-    // Badges
-    const badges = document.createElement("div");
-    badges.className = "badges";
-    if(sameYMD(d,hoy)){
-      const b = document.createElement("span");
-      b.className = "badge"; b.textContent = "Hoy";
-      badges.appendChild(b);
+          if(isEditor){
+            const del=document.createElement("button"); del.className="del"; del.textContent="🗑️";
+            del.title="Eliminar"; del.addEventListener("click",()=>removeBirthday(ev.id));
+            e.appendChild(del);
+          }
+          cell.appendChild(e);
+        }
+        calBody.appendChild(cell);
+      }
     }
-    if(list.length>0){
-      const b = document.createElement("span");
-      b.className = "badge"; b.textContent = `${list.length} 🎂`;
-      badges.appendChild(b);
-    }
-    cell.appendChild(badges);
 
-    // Nombres del día
-    const namesBox = document.createElement("div");
-    namesBox.className = "names";
-    if(list.length===0){
-      const p = document.createElement("div");
-      p.className = "muted";
-      p.textContent = "—";
-      namesBox.appendChild(p);
-    } else {
-      list.forEach(p=>{
-        const pill = document.createElement("button");
-        pill.type = "button";
-        pill.className = "name-pill";
-        pill.title = p.email ? `${p.name} • ${p.email}` : p.name;
-        pill.textContent = p.name + (p.email ? ` (${p.email})` : "");
-        pill.addEventListener("click",(ev)=>{
-          ev.stopPropagation(); // no activar zoom al editar
-          setFormMode("edit", p);
-          nameEl.focus();
+    // ---------- Render lista ----------
+    function renderList(){
+      listBody.innerHTML="";
+      let data=[...allItems];
+      // Orden: mes, día, nombre
+      data.sort((a,b)=> (a.m-b.m) || (a.d-b.d) || a.name.localeCompare(b.name));
+      const q = ($("#search").value||"").toLowerCase().trim();
+      if(q) data=data.filter(x=>x.name.toLowerCase().includes(q));
+
+      for(const it of data){
+        const tr=document.createElement("tr");
+        tr.innerHTML = `
+          <td>${it.name}</td>
+          <td>${pad2(it.m)}</td>
+          <td>${pad2(it.d)}</td>
+          <td>${it.dept?it.dept:""}</td>
+          <td class="right">${isEditor?<button class="btn secondary" data-del="${it.id}">Eliminar</button>:""}</td>
+        `;
+        listBody.appendChild(tr);
+      }
+      if(isEditor){
+        listBody.querySelectorAll("[data-del]").forEach(btn=>{
+          btn.addEventListener("click",()=>removeBirthday(btn.getAttribute("data-del")));
         });
-        namesBox.appendChild(pill);
+      }
+    }
+
+    // ---------- Hoy ----------
+    function renderToday(){
+      const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+      const todays=allItems.filter(it=>Number(it.m)===m&&Number(it.d)===d);
+      if(todays.length===0){todayBox.style.display="none";return;}
+      todayBox.style.display="block";
+      todayBox.innerHTML=<strong>🎂 Cumpleaños de hoy:</strong> ${todays.map(t=>t.name).join(", ")};
+    }
+
+    // ---------- Búsqueda ----------
+    function applySearch(){
+      const gridVisible = !calHead.classList.contains("hidden");
+      if(gridVisible){ // en calendario ocultamos/mostramos cada evento
+        const q = ($("#search").value||"").toLowerCase().trim();
+        for(const e of calBody.querySelectorAll(".event")){
+          const text=e.firstChild.textContent.toLowerCase();
+          e.style.display=text.includes(q)?"flex":"none";
+        }
+      }else{
+        renderList();
+      }
+    }
+
+    // Inicializa render
+    renderWeekdays(); renderCalendar(); renderToday();
+
+    // Suscripción Firestore
+    if(db){
+      onSnapshot(collection(db,"birthdays"),(snap)=>{
+        allItems=snap.docs.map(d=>({id:d.id,...d.data()}));
+        allItems.forEach(x=>{x.m=Number(x.m);x.d=Number(x.d)});
+        renderCalendar(); renderToday(); renderList(); applySearch();
       });
     }
-    cell.appendChild(namesBox);
 
-    // Click para zoom
-    cell.addEventListener("click",(ev)=>{
-      // Si se pulsó dentro de un botón/nombre ya se manejó arriba
-      if(ev.target.closest(".name-pill")) return;
-      document.querySelectorAll(".day.zoom").forEach(el=>el.classList.remove("zoom"));
-      cell.classList.add("zoom");
-      // Pre-rellenar el formulario para agregar en este día
-      setFormMode("add");
-      monthEl.value = String(m+1);
-      const n = daysInMonth(2025, m);
-      fillDays(n);
-      dayEl.value = String(day);
+    // Navegación meses
+    $("#prev").addEventListener("click",()=>{curMonth--; if(curMonth<0){curMonth=11;curYear--;} renderCalendar(); applySearch();});
+    $("#next").addEventListener("click",()=>{curMonth++; if(curMonth>11){curMonth=0;curYear++;} renderCalendar(); applySearch();});
+
+    // Vistas
+    function showCalendar(){
+      calHead.classList.remove("hidden"); calBody.classList.remove("hidden");
+      listWrap.classList.add("hidden");
+      renderCalendar(); applySearch();
+    }
+    function showList(){
+      calHead.classList.add("hidden"); calBody.classList.add("hidden");
+      listWrap.classList.remove("hidden");
+      renderList();
+    }
+    $("#btnViewCal").addEventListener("click",showCalendar);
+    $("#btnViewList").addEventListener("click",showList);
+
+    // Login edición simple
+    $("#btnPwd").addEventListener("click",()=>{
+      if($("#pwd").value.trim()===SECRET){
+        isEditor=true;
+        $("#adminPanel").classList.remove("hidden");
+        $("#adminLogin").classList.add("hidden");
+        $("#modeLabel").textContent="Modo edición";
+        renderCalendar(); renderList();
+      }else alert("Contraseña incorrecta");
+    });
+    $("#btnLogout").addEventListener("click",()=>{
+      isEditor=false;
+      $("#adminPanel").classList.add("hidden");
+      $("#adminLogin").classList.remove("hidden");
+      $("#modeLabel").textContent="Modo lectura";
+      renderCalendar(); renderList();
     });
 
-    grid.appendChild(cell);
-  }
+    // CRUD
+    async function addBirthday(){
+      if(!isEditor){alert("No autorizado");return;}
+      const name=$("#name").value.trim(), m=Number($("#month").value), d=Number($("#day").value), dept=$("#dept").value.trim();
+      if(!name||!m||!d){alert("Nombre, mes y día son obligatorios");return;}
+      if(m<1||m>12||d<1||d>31){alert("Mes o día fuera de rango");return;}
+      if(!db){alert("Configura Firebase");return;}
+      await addDoc(collection(db,"birthdays"),{name,m,d,dept,md:${pad2(m)}-${pad2(d)},secret:SECRET});
+      $("#name").value=$("#month").value=$("#day").value=$("#dept").value="";
+    }
+    $("#btnAdd").addEventListener("click",addBirthday);
 
-  // Clic fuera para quitar zoom
-  document.addEventListener("click",(ev)=>{
-    if(!ev.target.closest(".day")){ document.querySelectorAll(".day.zoom").forEach(el=>el.classList.remove("zoom")); }
-  });
-}
+    async function removeBirthday(id){
+      if(!isEditor){alert("No autorizado");return;}
+      if(!db){alert("Configura Firebase");return;}
+      if(confirm("¿Eliminar cumpleaños?")) await deleteDoc(doc(db,"birthdays",id));
+    }
 
-function renderAll(){
-  // Asegura que mes y año existan (por si PEOPLE cambia)
-  labelMes.textContent = `${nombreMesES(view.m)} ${view.y}`;
-  buildCalendar();
-  renderBannerHoy();
-}
+    // Importación masiva
+    $("#btnBulk").addEventListener("click",async()=>{
+      if(!isEditor){alert("No autorizado");return;}
+      if(!db){alert("Configura Firebase");return;}
+      const txt=$("#bulk").value.trim(); if(!txt) return;
+      const lines=txt.split(/\r?\n/); let ok=0,bad=0;
+      for(const line of lines){
+        const parts=line.split(",").map(s=>s.trim());
+        if(parts.length<3){bad++;continue;}
+        const [name,mm,dd,dept=""] = parts; const m=Number(mm), d=Number(dd);
+        if(!name||!(m>=1&&m<=12)||!(d>=1&&d<=31)){bad++;continue;}
+        try{ await addDoc(collection(db,"birthdays"),{name,m,d,dept,md:${pad2(m)}-${pad2(d)},secret:SECRET}); ok++; }
+        catch{ bad++; }
+      }
+      alert(Importación completa. OK: ${ok}, errores: ${bad});
+      $("#bulk").value="";
+    });
 
-/* ====================== NAVEGACIÓN DE MESES ====================== */
-document.getElementById("prevBtn").addEventListener("click", ()=>{
-  view.m--; if(view.m<0){ view.m=11; view.y--; } renderAll();
-});
-document.getElementById("nextBtn").addEventListener("click", ()=>{
-  view.m++; if(view.m>11){ view.m=0; view.y++; } renderAll();
-});
-document.getElementById("todayBtn").addEventListener("click", ()=>{
-  const t=today(); view.y=t.getFullYear(); view.m=t.getMonth(); renderAll();
-});
-
-/* ====================== INICIALIZACIÓN ====================== */
-// Si no hay datos, coloca unos ejemplos (puedes borrar esto si no quieres ejemplos)
-if(PEOPLE.length===0){
-  PEOPLE = [
-    {id:uid(), name:"Helen Hidalgo Calderón", month:2, day:3, email:""},
-    {id:uid(), name:"Ana Yancy Rodríguez Villalobos", month:1, day:10, email:""},
-    {id:uid(), name:"Mauricio Gamboa Gamboa", month:10, day:29, email:"mauricio@example.com"}
-  ];
-  saveData(PEOPLE);
-}
-
-fillMonthDaySelectors();
-setFormMode("add");
-renderAll();
-
-</script>
+    // Búsqueda
+    $("#search").addEventListener("input",applySearch);
+    $("#clear").addEventListener("click",()=>{$("#search").value="";applySearch();});
+  </script>
 </body>
 </html>
