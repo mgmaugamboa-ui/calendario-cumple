@@ -3,16 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Calendario de Cumpleaños</title>
+  <title>Cumpleaños LT</title>
   <style>
-    :root{--blue:#1976d2;--blue2:#1565c0;--ink:#1f2a44;--muted:#5b6b95;--line:#e3e8f4;--bg:#f4f7fb}
+    :root{--blue:#1976d2;--blue2:#1565c0;--ink:#1f2a44;--line:#e3e8f4;--bg:#f4f7fb}
     *{box-sizing:border-box}
     body{margin:0;font-family:Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
     header{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;background:var(--blue);color:#fff;padding:14px 18px}
-    h1{margin:0;font-size:1.1rem}
-    .toolbar{display:flex;gap:8px;align-items:center}
-    .toolbar button{border:1px solid var(--blue2);background:#2196f3;color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}
-    .toolbar button:hover{background:var(--blue2)}
+    h1{margin:0;font-size:1.2rem}
+    .toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{border:1px solid var(--blue2);background:#2196f3;color:#fff;border-radius:6px;padding:6px 10px;cursor:pointer}
+    .btn.secondary{background:#5b6b95;border-color:#4a587f}
+    .btn:hover{background:var(--blue2)}
     .input{padding:6px 10px;border:1px solid #cfd8ea;border-radius:6px}
     main{max-width:980px;margin:0 auto;padding:16px}
     .today-box{background:#fff3cd;border:1px solid #ffe8a1;border-radius:10px;padding:12px;margin:10px 0;display:none}
@@ -26,41 +27,71 @@
     .panel{background:#fff;border:1px dashed #cfd8ea;border-radius:10px;padding:12px;margin:14px 0}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .small{font-size:.9rem;color:#444}
+    /* Lista */
+    .list{background:#fff;border:1px solid var(--line);border-radius:10px;margin-top:10px;overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid #eef2f9;font-size:.95rem}
+    th{background:#eef3ff;text-align:left;color:#31406e}
+    .right{text-align:right}
+    .hidden{display:none}
   </style>
 </head>
 <body>
   <header>
     <div class="toolbar">
-      <h1>🎉 Calendario de Cumpleaños</h1>
+      <h1>🎉 Cumpleaños LT</h1>
     </div>
+
     <div class="toolbar">
-      <button id="prev">⟨ Mes anterior</button>
+      <button id="prev" class="btn">⟨ Mes anterior</button>
       <div id="monthTitle" style="font-weight:600"></div>
-      <button id="next">Mes siguiente ⟩</button>
+      <button id="next" class="btn">Mes siguiente ⟩</button>
     </div>
+
     <div class="toolbar">
+      <button id="btnViewCal" class="btn">Vista calendario</button>
+      <button id="btnViewList" class="btn secondary">Vista lista</button>
       <input id="search" class="input" placeholder="Buscar nombre" />
-      <button id="clear">Limpiar</button>
+      <button id="clear" class="btn secondary">Limpiar</button>
     </div>
   </header>
 
   <main>
+    <!-- Cumpleaños de hoy -->
     <section id="today" class="today-box"></section>
 
+    <!-- CABECERA de semana y CALENDARIO -->
     <section id="calHead" class="calendar"></section>
     <section id="calendar" class="calendar"></section>
 
+    <!-- LISTA -->
+    <section id="listWrap" class="list hidden">
+      <table id="listTable">
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Mes</th>
+            <th>Día</th>
+            <th>Departamento</th>
+            <th class="right">Acción</th>
+          </tr>
+        </thead>
+        <tbody id="listBody"></tbody>
+      </table>
+    </section>
+
+    <!-- Login edición simple -->
     <section id="adminLogin" class="panel">
       <div class="row">
         <label>Contraseña de edición (simple):</label>
         <input type="password" id="pwd" class="input" placeholder="Escriba la contraseña" />
-        <button id="btnPwd">Entrar</button>
+        <button id="btnPwd" class="btn">Entrar</button>
         <span id="modeLabel">Modo lectura</span>
       </div>
-      
     </section>
 
-    <section id="adminPanel" class="panel" style="display:none">
+    <!-- Panel edición -->
+    <section id="adminPanel" class="panel hidden">
       <h3 style="margin:0 0 8px 0">Agregar cumpleaños</h3>
       <div class="row">
         <input type="text" id="name" class="input" placeholder="Nombre" />
@@ -69,7 +100,7 @@
         <label>Día</label>
         <input type="number" id="day" class="input" min="1" max="31" placeholder="DD" style="width:90px" />
         <input type="text" id="dept" class="input" placeholder="Departamento (opcional)" />
-        <button id="btnAdd">Agregar</button>
+        <button id="btnAdd" class="btn">Agregar</button>
       </div>
 
       <h4 style="margin:14px 0 6px 0">Importación masiva</h4>
@@ -81,8 +112,8 @@
 Ana Pérez,02,11
 Luis Gómez,08,30,Dirección"></textarea>
       <div class="row" style="margin-top:8px">
-        <button id="btnBulk">⬆️ Importar</button>
-        <button id="btnLogout">Salir de edición</button>
+        <button id="btnBulk" class="btn">⬆️ Importar</button>
+        <button id="btnLogout" class="btn secondary">Salir de edición</button>
       </div>
     </section>
   </main>
@@ -91,38 +122,216 @@ Luis Gómez,08,30,Dirección"></textarea>
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-  const firebaseConfig = {
-  apiKey: "AIzaSyAqdejaNqu8YeiOPID6WcGwU6TLpyy_5ew",
-  authDomain: "cumplelt-44191.firebaseapp.com",
-  projectId: "cumplelt-44191",
-  storageBucket: "cumplelt-44191.firebasestorage.app",
-  messagingSenderId: "793481323824",
-  appId: "1:793481323824:web:d69b527fc2d91555cd94f5"
-};
+    // ⬇️ Revisa que storageBucket coincida con tu consola (normalmente *.appspot.com)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAqdejaNqu8YeiOPID6WcGwU6TLpyy_5ew",
+      authDomain: "cumplelt-44191.firebaseapp.com",
+      projectId: "cumplelt-44191",
+      storageBucket: "cumplelt-44191.appspot.com",
+      messagingSenderId: "793481323824",
+      appId: "1:793481323824:web:d69b527fc2d91555cd94f5"
+    };
 
     const SECRET = "tarrazu";
     let db = null;
-    try { const app = initializeApp(firebaseConfig); db = getFirestore(app); } catch (e) { console.warn("Firebase no inicializado todavía."); }
+    try { const app = initializeApp(firebaseConfig); db = getFirestore(app); }
+    catch (e) { console.warn("Firebase no inicializado todavía.", e); }
 
     const $=s=>document.querySelector(s);
-    const monthTitle=$("#monthTitle"),todayBox=$("#today"),calHead=$("#calHead"),calBody=$("#calendar");
+    const monthTitle=$("#monthTitle"),todayBox=$("#today"),
+          calHead=$("#calHead"),calBody=$("#calendar"),
+          listWrap=$("#listWrap"),listBody=$("#listBody");
+
     const weekdays=["Lun","Mar","Mié","Jue","Vie","Sáb","Dom"];
     let allItems=[],isEditor=false,cur=new Date(),curMonth=cur.getMonth(),curYear=cur.getFullYear();
     const pad2=n=>String(n).padStart(2,"0");
 
-    function renderWeekdays(){calHead.innerHTML="";for(const w of weekdays){const el=document.createElement("div");el.className="wday";el.textContent=w;calHead.appendChild(el);}};
-    function renderCalendar(){calBody.innerHTML="";const first=new Date(curYear,curMonth,1);const last=new Date(curYear,curMonth+1,0);const startIdx=(first.getDay()+6)%7;const daysInMonth=last.getDate();monthTitle.textContent=first.toLocaleDateString("es-CR",{month:"long",year:"numeric"});for(let i=0;i<startIdx;i++){const e=document.createElement("div");e.className="day";calBody.appendChild(e);}for(let d=1;d<=daysInMonth;d++){const cell=document.createElement("div");cell.className="day";if(d===new Date().getDate()&&curMonth===new Date().getMonth()&&curYear===new Date().getFullYear()){cell.classList.add("today");}const dateEl=document.createElement("div");dateEl.className="date";dateEl.textContent=d;cell.appendChild(dateEl);const events=allItems.filter(it=>Number(it.m)===curMonth+1&&Number(it.d)===d).sort((a,b)=>a.name.localeCompare(b.name));for(const ev of events){const e=document.createElement("div");e.className="event";const label=document.createElement("span");label.textContent=ev.name+(ev.dept?` — ${ev.dept}`:"");e.appendChild(label);if(isEditor){const del=document.createElement("button");del.className="del";del.textContent="🗑️";del.addEventListener("click",()=>removeBirthday(ev.id));e.appendChild(del);}cell.appendChild(e);}calBody.appendChild(cell);}};
-    function renderToday(){const now=new Date(),m=now.getMonth()+1,d=now.getDate();const todays=allItems.filter(it=>Number(it.m)===m&&Number(it.d)===d);if(todays.length===0){todayBox.style.display="none";return;}todayBox.style.display="block";todayBox.innerHTML=`<strong>🎂 Cumpleaños de hoy:</strong> ${todays.map(t=>t.name).join(", ")}`;};
-    function applySearch(){const q=($("#search").value||"").toLowerCase().trim();for(const e of calBody.querySelectorAll(".event")){const text=e.firstChild.textContent.toLowerCase();e.style.display=text.includes(q)?"flex":"none";}};
-    renderWeekdays();renderCalendar();renderToday();
-    if(db){onSnapshot(collection(db,"birthdays"),(snap)=>{allItems=snap.docs.map(d=>({id:d.id,...d.data()}));allItems.forEach(x=>{x.m=Number(x.m);x.d=Number(x.d)});renderCalendar();renderToday();applySearch();});}
-    $("#prev").addEventListener("click",()=>{curMonth--;if(curMonth<0){curMonth=11;curYear--;}renderCalendar();applySearch();});$("#next").addEventListener("click",()=>{curMonth++;if(curMonth>11){curMonth=0;curYear++;}renderCalendar();applySearch();});
-    $("#btnPwd").addEventListener("click",()=>{if($("#pwd").value.trim()===SECRET){isEditor=true;$("#adminPanel").style.display="block";$("#adminLogin").style.display="none";$("#modeLabel").textContent="Modo edición";renderCalendar();}else alert("Contraseña incorrecta");});$("#btnLogout").addEventListener("click",()=>{isEditor=false;$("#adminPanel").style.display="none";$("#adminLogin").style.display="block";$("#modeLabel").textContent="Modo lectura";renderCalendar();});
-    async function addBirthday(){if(!isEditor){alert("No autorizado");return;}const name=$("#name").value.trim(),m=Number($("#month").value),d=Number($("#day").value),dept=$("#dept").value.trim();if(!name||!m||!d){alert("Nombre, mes y día son obligatorios");return;}if(m<1||m>12||d<1||d>31){alert("Mes o día fuera de rango");return;}if(!db){alert("Configura Firebase");return;}await addDoc(collection(db,"birthdays"),{name,m,d,dept,md:`${pad2(m)}-${pad2(d)}`,secret:SECRET});$("#name").value="";$("#month").value="";$("#day").value="";$("#dept").value="";};
+    // ---------- Render cabecera semana ----------
+    function renderWeekdays(){
+      calHead.innerHTML="";
+      for(const w of weekdays){
+        const el=document.createElement("div");
+        el.className="wday"; el.textContent=w;
+        calHead.appendChild(el);
+      }
+    }
+
+    // ---------- Render calendario ----------
+    function renderCalendar(){
+      calBody.innerHTML="";
+      const first=new Date(curYear,curMonth,1);
+      const last=new Date(curYear,curMonth+1,0);
+      const startIdx=(first.getDay()+6)%7; // lunes=0
+      const daysInMonth=last.getDate();
+      monthTitle.textContent=first.toLocaleDateString("es-CR",{month:"long",year:"numeric"});
+
+      for(let i=0;i<startIdx;i++){const e=document.createElement("div");e.className="day";calBody.appendChild(e);}
+
+      for(let d=1; d<=daysInMonth; d++){
+        const cell=document.createElement("div"); cell.className="day";
+        const now=new Date();
+        if(d===now.getDate() && curMonth===now.getMonth() && curYear===now.getFullYear()){cell.classList.add("today");}
+
+        const dateEl=document.createElement("div"); dateEl.className="date"; dateEl.textContent=d; cell.appendChild(dateEl);
+
+        const events=allItems
+          .filter(it=>Number(it.m)===curMonth+1 && Number(it.d)===d)
+          .sort((a,b)=>a.name.localeCompare(b.name));
+
+        for(const ev of events){
+          const e=document.createElement("div"); e.className="event";
+          const label=document.createElement("span");
+          label.textContent=ev.name+(ev.dept?` — ${ev.dept}`:"");
+          e.appendChild(label);
+
+          if(isEditor){
+            const del=document.createElement("button"); del.className="del"; del.textContent="🗑️";
+            del.title="Eliminar"; del.addEventListener("click",()=>removeBirthday(ev.id));
+            e.appendChild(del);
+          }
+          cell.appendChild(e);
+        }
+        calBody.appendChild(cell);
+      }
+    }
+
+    // ---------- Render lista ----------
+    function renderList(){
+      listBody.innerHTML="";
+      let data=[...allItems];
+      // Orden: mes, día, nombre
+      data.sort((a,b)=> (a.m-b.m) || (a.d-b.d) || a.name.localeCompare(b.name));
+      const q = ($("#search").value||"").toLowerCase().trim();
+      if(q) data=data.filter(x=>x.name.toLowerCase().includes(q));
+
+      for(const it of data){
+        const tr=document.createElement("tr");
+        tr.innerHTML = `
+          <td>${it.name}</td>
+          <td>${pad2(it.m)}</td>
+          <td>${pad2(it.d)}</td>
+          <td>${it.dept?it.dept:""}</td>
+          <td class="right">${isEditor?`<button class="btn secondary" data-del="${it.id}">Eliminar</button>`:""}</td>
+        `;
+        listBody.appendChild(tr);
+      }
+      if(isEditor){
+        listBody.querySelectorAll("[data-del]").forEach(btn=>{
+          btn.addEventListener("click",()=>removeBirthday(btn.getAttribute("data-del")));
+        });
+      }
+    }
+
+    // ---------- Hoy ----------
+    function renderToday(){
+      const now=new Date(),m=now.getMonth()+1,d=now.getDate();
+      const todays=allItems.filter(it=>Number(it.m)===m&&Number(it.d)===d);
+      if(todays.length===0){todayBox.style.display="none";return;}
+      todayBox.style.display="block";
+      todayBox.innerHTML=`<strong>🎂 Cumpleaños de hoy:</strong> ${todays.map(t=>t.name).join(", ")}`;
+    }
+
+    // ---------- Búsqueda ----------
+    function applySearch(){
+      const gridVisible = !calHead.classList.contains("hidden");
+      if(gridVisible){ // en calendario ocultamos/mostramos cada evento
+        const q = ($("#search").value||"").toLowerCase().trim();
+        for(const e of calBody.querySelectorAll(".event")){
+          const text=e.firstChild.textContent.toLowerCase();
+          e.style.display=text.includes(q)?"flex":"none";
+        }
+      }else{
+        renderList();
+      }
+    }
+
+    // Inicializa render
+    renderWeekdays(); renderCalendar(); renderToday();
+
+    // Suscripción Firestore
+    if(db){
+      onSnapshot(collection(db,"birthdays"),(snap)=>{
+        allItems=snap.docs.map(d=>({id:d.id,...d.data()}));
+        allItems.forEach(x=>{x.m=Number(x.m);x.d=Number(x.d)});
+        renderCalendar(); renderToday(); renderList(); applySearch();
+      });
+    }
+
+    // Navegación meses
+    $("#prev").addEventListener("click",()=>{curMonth--; if(curMonth<0){curMonth=11;curYear--;} renderCalendar(); applySearch();});
+    $("#next").addEventListener("click",()=>{curMonth++; if(curMonth>11){curMonth=0;curYear++;} renderCalendar(); applySearch();});
+
+    // Vistas
+    function showCalendar(){
+      calHead.classList.remove("hidden"); calBody.classList.remove("hidden");
+      listWrap.classList.add("hidden");
+      renderCalendar(); applySearch();
+    }
+    function showList(){
+      calHead.classList.add("hidden"); calBody.classList.add("hidden");
+      listWrap.classList.remove("hidden");
+      renderList();
+    }
+    $("#btnViewCal").addEventListener("click",showCalendar);
+    $("#btnViewList").addEventListener("click",showList);
+
+    // Login edición simple
+    $("#btnPwd").addEventListener("click",()=>{
+      if($("#pwd").value.trim()===SECRET){
+        isEditor=true;
+        $("#adminPanel").classList.remove("hidden");
+        $("#adminLogin").classList.add("hidden");
+        $("#modeLabel").textContent="Modo edición";
+        renderCalendar(); renderList();
+      }else alert("Contraseña incorrecta");
+    });
+    $("#btnLogout").addEventListener("click",()=>{
+      isEditor=false;
+      $("#adminPanel").classList.add("hidden");
+      $("#adminLogin").classList.remove("hidden");
+      $("#modeLabel").textContent="Modo lectura";
+      renderCalendar(); renderList();
+    });
+
+    // CRUD
+    async function addBirthday(){
+      if(!isEditor){alert("No autorizado");return;}
+      const name=$("#name").value.trim(), m=Number($("#month").value), d=Number($("#day").value), dept=$("#dept").value.trim();
+      if(!name||!m||!d){alert("Nombre, mes y día son obligatorios");return;}
+      if(m<1||m>12||d<1||d>31){alert("Mes o día fuera de rango");return;}
+      if(!db){alert("Configura Firebase");return;}
+      await addDoc(collection(db,"birthdays"),{name,m,d,dept,md:`${pad2(m)}-${pad2(d)}`,secret:SECRET});
+      $("#name").value=$("#month").value=$("#day").value=$("#dept").value="";
+    }
     $("#btnAdd").addEventListener("click",addBirthday);
-    async function removeBirthday(id){if(!isEditor){alert("No autorizado");return;}if(!db){alert("Configura Firebase");return;}if(confirm("¿Eliminar cumpleaños?"))await deleteDoc(doc(db,"birthdays",id));};
-    $("#btnBulk").addEventListener("click",async()=>{if(!isEditor){alert("No autorizado");return;}if(!db){alert("Configura Firebase");return;}const txt=$("#bulk").value.trim();if(!txt)return;const lines=txt.split(/\r?\n/);let ok=0,bad=0;for(const line of lines){const parts=line.split(",").map(s=>s.trim());if(parts.length<3){bad++;continue;}const[name,mm,dd,dept=""] = parts;const m=Number(mm),d=Number(dd);if(!name||!(m>=1&&m<=12)||!(d>=1&&d<=31)){bad++;continue;}try{await addDoc(collection(db,"birthdays"),{name,m,d,dept,md:`${pad2(m)}-${pad2(d)}`,secret:SECRET});ok++;}catch{bad++;}}alert(`Importación completa. OK: ${ok}, errores: ${bad}`);$("#bulk").value="";});
-    $("#search").addEventListener("input",applySearch);$("#clear").addEventListener("click",()=>{$("#search").value="";applySearch();});
+
+    async function removeBirthday(id){
+      if(!isEditor){alert("No autorizado");return;}
+      if(!db){alert("Configura Firebase");return;}
+      if(confirm("¿Eliminar cumpleaños?")) await deleteDoc(doc(db,"birthdays",id));
+    }
+
+    // Importación masiva
+    $("#btnBulk").addEventListener("click",async()=>{
+      if(!isEditor){alert("No autorizado");return;}
+      if(!db){alert("Configura Firebase");return;}
+      const txt=$("#bulk").value.trim(); if(!txt) return;
+      const lines=txt.split(/\r?\n/); let ok=0,bad=0;
+      for(const line of lines){
+        const parts=line.split(",").map(s=>s.trim());
+        if(parts.length<3){bad++;continue;}
+        const [name,mm,dd,dept=""] = parts; const m=Number(mm), d=Number(dd);
+        if(!name||!(m>=1&&m<=12)||!(d>=1&&d<=31)){bad++;continue;}
+        try{ await addDoc(collection(db,"birthdays"),{name,m,d,dept,md:`${pad2(m)}-${pad2(d)}`,secret:SECRET}); ok++; }
+        catch{ bad++; }
+      }
+      alert(`Importación completa. OK: ${ok}, errores: ${bad}`);
+      $("#bulk").value="";
+    });
+
+    // Búsqueda
+    $("#search").addEventListener("input",applySearch);
+    $("#clear").addEventListener("click",()=>{$("#search").value="";applySearch();});
   </script>
 </body>
 </html>
