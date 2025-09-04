@@ -93,16 +93,16 @@ Luis Gómez,08,30,Dirección"></textarea>
     import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
     import { getFirestore, collection, addDoc, deleteDoc, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
 
-    const firebaseConfig = {
-      apiKey: "PASTE_API_KEY",
-      authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-      projectId: "PASTE_PROJECT_ID",
-      storageBucket: "PASTE_PROJECT_ID.appspot.com",
-      messagingSenderId: "PASTE_SENDER_ID",
-      appId: "PASTE_APP_ID"
-    };
+  const firebaseConfig = {
+  apiKey: "AIzaSyAqdejaNqu8YeiOPID6WcGwU6TLpyy_5ew",
+  authDomain: "cumplelt-44191.firebaseapp.com",
+  projectId: "cumplelt-44191",
+  storageBucket: "cumplelt-44191.firebasestorage.app",
+  messagingSenderId: "793481323824",
+  appId: "1:793481323824:web:d69b527fc2d91555cd94f5"
+};
 
-    const SECRET = "tarrazu";
+    const SECRET = "tarrazu1963";
     let db = null;
     try { const app = initializeApp(firebaseConfig); db = getFirestore(app); } catch (e) { console.warn("Firebase no inicializado todavía."); }
 
